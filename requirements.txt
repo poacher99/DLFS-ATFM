@@ -1,0 +1,12 @@
+opencv-python
+visdom
+lpips
+torchmetrics
+dominate
+numpy
+scipy
+pillow
+unidecode
+requests
+tqdm
+dlib
