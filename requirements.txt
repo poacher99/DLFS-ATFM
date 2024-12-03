@@ -5,7 +5,7 @@ torchmetrics
 dominate
 numpy
 scipy
-pillow
+pillow==9.5
 unidecode
 requests
 tqdm
