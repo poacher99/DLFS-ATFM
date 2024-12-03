@@ -33,4 +33,8 @@ python test_distan.py --verbose --dataroot ./datasets/males --name males_model  
 
 ## Acknowledgements
 
-This repository is based on [DLFS](https://github.com/SenHe/DLFS).
+This repository is a modified version of the code from [DLFS](https://github.com/SenHe/DLFS), which is licensed under the [CC BY-NC-SA 4.0 License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+The modifications made in this repository are also shared under the same license.
+
+The test dataset we used, FFHQ Aging, can be found [here](https://github.com/royorel/FFHQ-Aging-Dataset/tree/master). This dataset also follows the CC BY-NC-SA 4.0 License.
+
