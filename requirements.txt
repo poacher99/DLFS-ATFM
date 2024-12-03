@@ -1,3 +1,4 @@
+pillow==9.5
 opencv-python
 visdom
 lpips
@@ -5,7 +6,6 @@ torchmetrics
 dominate
 numpy
 scipy
-pillow==9.5
 unidecode
 requests
 tqdm
