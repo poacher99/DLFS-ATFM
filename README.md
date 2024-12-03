@@ -1,6 +1,7 @@
 # Decoupled Facial Aging Image Generation with Enhanced Age-Transform Coding
 
-
+## Demo on Colab
+[![Explore in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Yl2g6T86xpXF0DerJhpTr97I-VfB1rYX?usp=sharing)<br>
 
 ## Preparation
 
