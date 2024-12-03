@@ -149,7 +149,7 @@ table td {width: %dpx; height: %dpx; padding: 4px; outline: 4px solid black}
         util.save_image(traversal_img, image_path)
 
     def make_video(self, visuals, video_path):
-        fps = 0.5#25
+        fps = 20#25
         visual = visuals[0]
         orig_img = visual['orig_img']
         h, w = orig_img.shape[0], orig_img.shape[1]
