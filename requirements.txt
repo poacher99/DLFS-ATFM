@@ -1,8 +1,7 @@
-pillow==9.5
+pillow
 opencv-python
 visdom
 lpips
-torchvision==0.19.0
 torchmetrics
 dominate
 numpy
