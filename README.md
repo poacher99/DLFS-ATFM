@@ -8,7 +8,7 @@ Please follow [this github](https://github.com/royorel/Lifespan_Age_Transformati
 
 ## Training and Testing 
 
-The pre-trained generative model can be downloaded from [here](https://drive.google.com/file/d/1vbkm4r_PK__bKhmhg61WOd4CX5aeXUhc/view?usp=sharing)
+The pre-trained generative model can be downloaded from [here](https://drive.google.com/uc?export=download&id=1qWIcrMtE-xEDsVLexjCUi1NXJaJcXNSS)
 
 ### Linux
 training (please modify `--dataroot`, `--name`):
