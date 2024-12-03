@@ -151,7 +151,7 @@ table td {width: %dpx; height: %dpx; padding: 4px; outline: 4px solid black}
     def make_video(self, visuals, video_path):
         fps = 0.5#25
         visual = visuals[0]
-        orig_img = visual['orig_img_cls_0']
+        orig_img = visual['orig_img']
         h, w = orig_img.shape[0], orig_img.shape[1]
         writer = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w,h))
         out_classes = len(visual) - 1
