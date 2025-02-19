@@ -8,8 +8,7 @@
 Please follow [this github](https://github.com/royorel/Lifespan_Age_Transformation_Synthesis) to prepare the environments and dataset.
 
 ## Training and Testing 
-
-The pre-trained generative model can be downloaded from [here](https://drive.google.com/uc?export=download&id=1qWIcrMtE-xEDsVLexjCUi1NXJaJcXNSS)
+The pre-trained generative model can be downloaded from [here](https://drive.google.com/uc?export=download&id=1VFtJ4DijFsyOew96etk5Muh93QX8K9Tk)
 
 ### Linux
 training (please modify `--dataroot`, `--name`):
