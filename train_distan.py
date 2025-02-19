@@ -21,7 +21,7 @@ def train(opt):
     if opt.continue_train:
         if opt.which_epoch == 'latest':
             try:
-                start_epoch, epoch_iter = np.loadtxt(iter_path , delimiter=',', dtype=int)
+                start_epoch, epoch_iter, total_steps = np.loadtxt(iter_path , delimiter=',', dtype=int)
                 epoch_iter = epoch_iter//opt.batchSize
             except:
                 start_epoch, epoch_iter = 1, 0
@@ -47,6 +47,7 @@ def train(opt):
     # model.netG.id_encoder.load_state_dict(torch.load('checkpoints/DLFS_males_model/id_encoder.pth').state_dict())
     # model.netG.decoder.load_state_dict(torch.load('checkpoints/DLFS_males_model/decoder.pth').state_dict())
     
+    model.float()
     
     total_steps = (start_epoch) * dataset_size + epoch_iter
     display_delta = total_steps % opt.display_freq
@@ -93,7 +94,14 @@ def train(opt):
             #import ipdb; ipdb.set_trace()
             model.set_inputs(data)
             disc_losses = model.update_distan_D()
-            gen_losses, gen_in, gen_out, rec_out, cyc_out = model.update_distan_G(infer=save_fake)
+            gen_losses, gen_in, gen_out, rec_out, cyc_out = model.update_distan_G(infer=save_fake, step=total_steps)
+            
+            for k, v in gen_losses.items():
+                if torch.isnan(v):
+                    print('nan in gen_losses', k)
+                    model.save('nan')
+                    raise ValueError('nan in gen_losses')
+            
             loss_dict = dict(gen_losses, **disc_losses)
             print('epoch',epoch,'batch: ',i,loss_dict)
             
@@ -136,7 +144,7 @@ def train(opt):
             # if total_steps == 200:
                 print('saving the latest model (epoch %d, total_steps %d)' % (epoch+1, total_steps))
                 model.save('latest')
-                np.savetxt(iter_path, (epoch, epoch_iter), delimiter=',', fmt='%d')
+                np.savetxt(iter_path, (epoch, epoch_iter, total_steps), delimiter=',', fmt='%d')
                 # if opt.display_id == 0:
                 if opt.display_id == 0 and total_steps % 1600 == save_delta:
                     model.eval()
@@ -154,7 +162,7 @@ def train(opt):
             print('saving the model at the end of epoch %d, iters %d' % (epoch+1, total_steps))
             model.save('latest')
             model.save(epoch+1)
-            np.savetxt(iter_path, (epoch+1, 0), delimiter=',', fmt='%d')
+            np.savetxt(iter_path, (epoch+1, 0, epoch), delimiter=',', fmt='%d')
             model.eval()
             visuals = model.inference(sample_data)
             visualizer.save_matrix_image(visuals, str(epoch+1))

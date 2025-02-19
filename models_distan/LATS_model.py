@@ -12,6 +12,22 @@ import util.util as util
 from . import networks
 from pdb import set_trace as st
 
+
+class AdaptiveKLDivLoss:
+    '''
+        Adaptive KL Divergence Loss acrroding to the step
+    '''
+    def __init__(self):
+        super(AdaptiveKLDivLoss, self).__init__()
+        self.beta = 0.0
+        self.warmup_step = 50000
+        
+    def get_beta(self, step):
+        step = step if step < self.warmup_step else self.warmup_step
+        rate = step / self.warmup_step
+        y = (rate - 1) ** 2 + 1e-4
+        return y
+
 class LATS(BaseModel): #Lifetime Age Transformation Synthesis
     def name(self):
         return 'LATS'
@@ -62,6 +78,7 @@ class LATS(BaseModel): #Lifetime Age Transformation Synthesis
             self.debug_mode = False
 
         ##### define networks
+        self.adaptiveKLDivLoss = AdaptiveKLDivLoss()
         # Generators
         if opt.encoder_type == 'original':
 
@@ -142,12 +159,14 @@ class LATS(BaseModel): #Lifetime Age Transformation Synthesis
 
             # set optimizer G
             paramsG = []
-            for p in self.netG.id_encoder.parameters():
-                p.requires_grad = False
-            for p in self.netG.decoder.parameters():
-                p.requires_grad = False
-            for p in self.netG.decoder.mlp.parameters():
-                p.requires_grad = True
+            # for p in self.netG.id_encoder.parameters():
+            #     p.requires_grad = False
+            # for p in self.netG.decoder.parameters():
+            #     p.requires_grad = False
+            # for p in self.netG.atf.parameters():
+            #     p.requires_grad = True
+            # for p in self.netG.decoder.mlp.parameters():
+            #     p.requires_grad = True
             params_dict_G = dict(self.netG.named_parameters())
             # set the MLP learning rate to 0.01 or the global learning rate
             for key, value in params_dict_G.items():
@@ -411,7 +430,7 @@ class LATS(BaseModel): #Lifetime Age Transformation Synthesis
                 None if not infer else rec_images_out,
                 None if not infer else cyc_images_out]
 
-    def update_distan_G(self, infer=False):
+    def update_distan_G(self, step, infer=False):
         # Generator optimization setp
         self.optimizer_G.zero_grad()
         self.get_conditions()
@@ -419,7 +438,7 @@ class LATS(BaseModel): #Lifetime Age Transformation Synthesis
         ############### multi GPU ###############
         #import ipdb; ipdb.set_trace()
         rec_images, gen_images, cyc_images, \
-        orig_structure_feat, fake_struct_features, z_kl_loss= self.netG(self.reals, self.gen_conditions, self.cyc_conditions, self.orig_conditions)
+        orig_structure_feat, fake_struct_features, kl_loss = self.netG(self.reals, self.gen_conditions, self.cyc_conditions, self.orig_conditions)
 
         #discriminator pass
         disc_out = self.netD(gen_images)
@@ -457,9 +476,11 @@ class LATS(BaseModel): #Lifetime Age Transformation Synthesis
         #print(loss_G_distan)
         #loss_distan = loss_G_GAN_distan + loss_G_age_distan + loss_G_identity_distan + loss_G_struct_distan
         
-
+        
+        beta = self.adaptiveKLDivLoss.get_beta(step)
+        # print(beta)
         # overall loss
-        loss_G = (loss_G_GAN + loss_G_Rec + loss_G_Cycle +  loss_G_distan + z_kl_loss).mean()
+        loss_G = (loss_G_GAN + loss_G_Rec + loss_G_Cycle +  loss_G_distan + beta * kl_loss.mean()).mean()
 
         loss_G.backward()
         self.optimizer_G.step()
@@ -492,7 +513,7 @@ class LATS(BaseModel): #Lifetime Age Transformation Synthesis
                     cyc_images_out = cyc_images
 
         loss_dict = {'loss_G_gen_Adv': loss_G_GAN_gen.mean(), 'loss_G_Cycle': loss_G_Cycle.mean(),
-                     'loss_G_Rec': loss_G_Rec.mean(), 'loss_G_struct_distan': loss_G_distan.mean(), 'loss_G_z_kl':z_kl_loss}
+                     'loss_G_Rec': loss_G_Rec.mean(), 'loss_G_struct_distan': loss_G_distan.mean(), 'kl_loss': kl_loss.mean()}
 
         return [loss_dict,
                 None if not infer else self.reals,
@@ -546,7 +567,7 @@ class LATS(BaseModel): #Lifetime Age Transformation Synthesis
         self.get_conditions()
 
         ############### multi GPU ###############
-        _, gen_images, _, _, _, _ = self.netG(self.reals, self.gen_conditions, self.cyc_conditions, self.orig_conditions, disc_pass=True)
+        _, gen_images, _, _, _, _= self.netG(self.reals, self.gen_conditions, self.cyc_conditions, self.orig_conditions, disc_pass=True)
         #fake discriminator pass
         fake_disc_in = gen_images.detach()
         #rec_disc_in = rec_images.detach()

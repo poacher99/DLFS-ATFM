@@ -997,6 +997,7 @@ class Distan_StyledDecoder(nn.Module):
                 latent = temp_latent.new_zeros((output_classes, temp_latent.shape[1]))
             else:
                 latent = self.mlp(target_age)
+                # print('lantent:', latent)
         else:
             latent = None
 
@@ -1155,10 +1156,7 @@ class Distan_Generator(nn.Module):
         #swap_id_features, swap_structure_feat, swap_texture_feat = self.id_encoder(input_swap)
         # orig_age_features = self.age_encoder(input)
         age_orig_latent, orig_kl_loss = self.atf(orig_texture_feat, source_age_code)
-        age_transfer_latent, gen_kl_loss = self.atf(orig_texture_feat, target_age_code)
-        kl_loss = 0
-        kl_loss += orig_kl_loss
-        kl_loss += gen_kl_loss
+        age_transfer_latent, trans_kl_loss = self.atf(orig_texture_feat, target_age_code)
         if disc_pass:
             rec_out = None
             #distan_out = None
@@ -1170,6 +1168,7 @@ class Distan_Generator(nn.Module):
         # gen_out = self.decode(orig_structure_feat, orig_texture_feat, target_age_features = age_transfer_latent)
         gen_out = self.decode(orig_structure_feat, orig_texture_feat, age_transfer_latent)
         #swap_out = self.decode(orig_structure_feat, swap_texture_feat, target_age_features = target_age_code, swap = False)
+        kl_loss = orig_kl_loss + trans_kl_loss
         if disc_pass:
             fake_id_features = None
             fake_structure_feat = None
